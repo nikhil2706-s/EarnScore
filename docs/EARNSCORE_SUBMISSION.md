@@ -2,15 +2,21 @@
 
 ## Alternative Creditworthiness Score for Gig Workers
 
-**Category:** FinTech  
+**Category:** FinTech
+
 **Secondary domain:** Alternative Credit Scoring and Financial Inclusion
 
 **Team name:** Winterfell Club
+
 **Team members:**
 
 - Nikhil Upadhyay
 - Sharath B S
 - Shaikh Asgar
+
+**GitHub repository:** <https://github.com/nikhil2706-s/EarnScore>
+
+**Prototype scope:** EarnScore is an explainable decision-support prototype. It is not an officially validated credit score, a trained machine-learning credit-risk model, or an automated loan-approval system.
 
 > **One-line pitch:** EarnScore converts fragmented gig-worker income and cash-flow records into an explainable financial profile that helps lenders recognize consistent earning capacity beyond salary slips and conventional credit history.
 
@@ -61,13 +67,13 @@ EarnScore is an explainable decision-support platform that transforms raw gig-pl
 
 ### User journey
 
-1. **Collect with consent:** The applicant uploads supported CSV statements or selects a simulated demo profile. A production version could use consent-based bank and Account Aggregator connections.
+1. **Collect with consent:** The current command-line pipeline ingests simulated CSV transaction records. A production version could accept applicant-authorized statements and consent-based bank or Account Aggregator connections.
 2. **Normalize:** EarnScore standardizes dates, amounts, transaction directions, and source names across platforms and accounts.
 3. **Clean and classify:** The system detects duplicate records, reversals, refunds, transfers between the applicant's own accounts, income, and expenses.
 4. **Build financial features:** It measures active earning months, month-to-month income variation, positive-cash-flow months, expense-to-income ratio, source concentration, recent income trend, and available financial buffer.
 5. **Calculate an EarnScore:** A deterministic model starts at 300 and awards up to 600 points across seven explainable financial features.
 6. **Measure confidence:** Data coverage, transaction density, classification quality, active earning history, and feature availability produce separate evidence-quality indicators.
-7. **Explain the result:** The dashboard displays factor-level points, plain-language explanations, the evidence used, income trends, source mix, and risk flags.
+7. **Explain the result:** The dashboard displays factor-level points, plain-language explanations, evidence values, confidence indicators, data-quality information, and risk flags.
 8. **Support human review:** A lender may approve, decline, or request more information and record notes. The review decision does not silently alter the calculated score.
 
 ### Explainable score design
@@ -124,6 +130,64 @@ The three development branches already contain the following working components:
 
 The human-review panel records the review locally in the current MVP. Persistent review storage and production identity controls are planned after the hackathon demonstration.
 
+#### Member 1 — Data pipeline
+
+The `feature/data-pipeline` branch at verified development commit `9482669` contains three simulated gig-worker datasets with **593 transactions** in total: 360 for the stable persona, 71 for the volatile persona, and 162 for the seasonal persona. The pipeline performs CSV ingestion, schema validation, normalization, exact-duplicate removal, conflicting-duplicate quarantine, refund and transfer handling, transaction classification, monthly aggregation, and CSV-to-JSON output.
+
+It calculates seven financial features:
+
+1. `active_months_ratio`
+2. `income_cv`
+3. `source_diversity`
+4. `positive_cashflow_months_ratio`
+5. `expense_to_income_ratio`
+6. `income_trend`
+7. `emergency_buffer_days`
+
+Source diversity uses a normalized income-concentration measure. Emergency-buffer information is returned as `null` when reliable running-balance data is unavailable; it is never silently treated as zero. A separate root-level `data_quality` object reports coverage months, missing months, transaction count, unclassified ratio, and evidence confidence. Member 1 reported **29 automated tests passed** for generation, schemas, cleaning, feature extraction, and command-line execution.
+
+#### Member 2 — backend and explainable scoring API
+
+The `feature/scoring-api` branch contains the implementation commits `62bef8f`, `abd5fae`, and `bc47a81`, the three-persona integration-test commit `bce6451`, and CORS integration commit `0122245`. The Python, FastAPI, Pydantic, and Pytest backend provides `GET /`, `GET /health`, and `POST /score`.
+
+The API validates request bounds; calculates a deterministic score from 300 to 900; returns assessment bands, factor-level point contributions, explanations, and evidence values; preserves the pipeline's data-quality object; reports feature-completeness confidence separately; and generates risk flags. When a feature is genuinely unavailable, its scoring weight is excluded and the remaining factor weights are normalized. Factor points always reconcile with the final score.
+
+#### Member 3 — React lender dashboard
+
+The `feature/lender-dashboard` branch at reported commit `2448073` contains a responsive React, Vite, JavaScript, and CSS dashboard. It integrates with the real `POST /score` endpoint and presents an applicant assessment form, creditworthiness gauge, dynamic factor breakdown, risk flags, confidence and data-quality indicators, evidence views, API loading and error states, and a human-review interface.
+
+Member 3 reported that ESLint and the production build passed and that a live local assessment returned **782 — Strong**. No additional facts about that particular applicant are inferred. The review interaction is implemented in the frontend MVP, while persistent server-side review history is not established.
+
+#### Frontend–backend integration
+
+The React development server uses port 5173 and FastAPI uses port 8000. An initial browser preflight failure was resolved by adding FastAPI `CORSMiddleware` for `http://localhost:5173` and `http://127.0.0.1:5173`, with `GET`, `POST`, and `OPTIONS` allowed. The backend CORS preflight returned HTTP 200, and all eight backend tests continued to pass after the change.
+
+### Implementation and Validation Results
+
+The automated API integration output supplied for the final submission produced the following results:
+
+| Persona | Score | Assessment band | Data-quality confidence | Feature-completeness confidence |
+| --- | ---: | --- | ---: | ---: |
+| `demo-stable-001` | 836 | Strong | 1.00 | 0.95 |
+| `demo-volatile-002` | 485 | Needs Review | 0.61 | 0.95 |
+| `demo-seasonal-003` | 509 | Needs Review | 0.96 | 0.95 |
+
+The stable worker received only the **Emergency buffer data unavailable** flag. The volatile worker triggered **High income volatility**, **Irregular income activity**, and **Emergency buffer data unavailable**. The seasonal worker triggered **High income volatility** and **Emergency buffer data unavailable**.
+
+All three persona integration tests passed. The tests verified that scores stayed within 300–900, factor points reconciled with each final score, missing buffer values were handled correctly, explanations were nonempty, risk flags were generated, and feature-completeness confidence remained separate from data-quality confidence. The backend suite returned **8 passed** with one dependency-deprecation warning.
+
+The seasonal persona demonstrates why data quality and financial assessment must remain separate. Its 0.96 data-quality confidence means that the transaction evidence is extensive, sufficiently classified, and well covered; it does not mean the financial pattern is low risk. The same high-quality evidence reveals seasonal income volatility, producing a score of 509 and a **Needs Review** assessment. EarnScore therefore distinguishes “we have reliable evidence” from “the evidence describes a stable earning pattern.”
+
+### Capability status and MVP limitations
+
+| Status | Capabilities |
+| --- | --- |
+| Implemented and evidenced in Git branches | Simulated datasets; CSV cleaning and normalization; seven features; data-quality metrics; deterministic scoring API; explanations, risk flags, and confidence; React dashboard; local API integration; CORS configuration; automated pipeline, scoring, and integration tests |
+| Implemented or reported by a team member | Data-pipeline result of 29 tests passed; dashboard lint and production build results; live local dashboard assessment of 782 — Strong |
+| Planned production enhancement | Live bank and Account Aggregator integrations; persistent review history; production authentication and security; advanced audit trails; automated applicant dispute workflow; lender-specific calibration; repayment-outcome validation and monitoring |
+
+The MVP uses simulated transactions and deterministic, explainable rules. It does not perform automated lending approval, claim regulatory certification, or predict a calibrated probability of default. Comparing the three fixed personas demonstrates differences in financial patterns; the current MVP does not implement a general counterfactual-analysis engine. The components were tested locally and across their defined API contract. Because the three feature branches have not been represented here as a single verified release build, this report does not claim final merged-release verification.
+
 ### Demonstration scenarios
 
 - **Stable multi-platform worker:** moderate income, regular earnings, multiple sources, and healthy cash flow.
@@ -166,18 +230,18 @@ EarnScore records the lender's review separately from the calculated score. It s
 
 ### Product innovation
 
-- **Raw-to-understood transformation:** The dashboard visually shows how scattered payments become a coherent earning profile.
+- **Raw-to-understood transformation:** The data pipeline converts scattered simulated payments into a coherent feature payload, and the dashboard presents the resulting API assessment.
 - **Counterfactual comparison:** Judges and lenders can compare a stable moderate-income profile with a volatile high-income profile to understand the model's priorities.
-- **Explainable risk flags:** The product highlights income gaps, source dependence, negative cash-flow periods, sparse history, and classification uncertainty with supporting data.
-- **Reviewable decision trail:** Human decisions and notes remain distinct from model output, creating the basis for audit and future model evaluation.
+- **Explainable risk flags:** The scoring API identifies high income volatility, high expense-to-income ratio, irregular income activity, and unavailable emergency-buffer data using explicit thresholds.
+- **Reviewable decision separation:** The MVP interface keeps the local human-review choice and notes distinct from model output, providing a design basis for future persistent audit and evaluation controls.
 
 ### Responsible innovation
 
 - Uses financial-behavior signals relevant to the assessment purpose.
 - Excludes protected attributes and unnecessary personal data.
 - Makes data gaps and uncertainty visible.
-- Requires explicit human review.
-- Provides a path for applicants to understand and dispute the evidence used.
+- Keeps human review visible in the decision flow.
+- Presents understandable factor evidence; a formal applicant-dispute workflow remains a future enhancement.
 
 ## 6. Market Research
 
@@ -230,13 +294,13 @@ A production version could use a tiered B2B model:
 
 ### Research references
 
-1. NITI Aayog, *India's Booming Gig and Platform Economy: Perspectives and Recommendations on the Future of Work* (2022): gig-workforce estimates and projections.  
+1. NITI Aayog, *India's Booming Gig and Platform Economy: Perspectives and Recommendations on the Future of Work* (June 2022): gig-workforce estimates and projections.
    <https://www.niti.gov.in/sites/default/files/2022-06/Policy_Brief_India%27s_Booming_Gig_and_Platform_Economy_27062022.pdf>
-2. Reserve Bank of India, Account Aggregator directions and financial-data-sharing framework.  
+2. Reserve Bank of India, *Non-Banking Financial Company – Account Aggregator (Reserve Bank) Directions, 2016*: the regulatory framework for consent-based financial-data aggregation.
    <https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=10598>
-3. World Bank, *The Global Findex Database 2021*: financial-account ownership and digital-payment context.  
+3. World Bank, *The Global Findex Database 2021: Financial Inclusion, Digital Payments, and Resilience in the Age of COVID-19*: financial-account ownership and digital-payment context.
    <https://www.worldbank.org/en/publication/globalfindex>
-4. International Labour Organization, *World Employment and Social Outlook 2021: The Role of Digital Labour Platforms in Transforming the World of Work*.  
+4. International Labour Organization, *World Employment and Social Outlook 2021: The Role of Digital Labour Platforms in Transforming the World of Work* (2021).
    <https://www.ilo.org/publications/flagship-reports/role-digital-labour-platforms-transforming-world-work>
 
 The market figures above should be rechecked against the linked primary publications before external submission or publication. The hackathon MVP does not claim proprietary market validation or a production-ready risk model.
@@ -255,7 +319,7 @@ The market figures above should be rechecked against the linked primary publicat
 - Expands the assessable applicant pool while preserving structured review.
 - Reduces manual effort required to interpret multiple statements and irregular payment patterns.
 - Provides consistent features, explanations, and data-quality warnings.
-- Creates an auditable record that can support model governance and customer communication.
+- Produces structured explanations and evidence that could support governance and customer communication when combined with production-grade persistent audit controls.
 
 ### Wider economic and social impact
 
@@ -293,5 +357,11 @@ The demonstration is successful when it proves that:
 3. A consistent moderate-income worker can outperform a volatile high-income worker.
 4. Incomplete history lowers confidence and requests more data instead of presenting false certainty.
 5. Every factor can be explained using visible transaction evidence.
-6. The lender makes and records the final decision.
+6. The lender can record a local MVP review decision separately from the calculated score.
+
+## Conclusion
+
+EarnScore demonstrates that fragmented gig income can be converted into a consistent, explainable, and reviewable financial profile without relying on opaque personal signals. The implemented prototype joins a tested transaction pipeline, seven transparent financial features, a deterministic scoring API, and a lender-facing dashboard. Its results show the intended behavior: strong transaction coverage increases confidence in the evidence, while income volatility and irregular activity can still produce a cautious assessment.
+
+The immediate value is a clearer decision-support layer for non-salaried applicants. Production deployment would require consent-based integrations, persistent security and audit controls, lender-specific outcome calibration, regulatory review, fairness monitoring, and continued human oversight. Within its hackathon scope, EarnScore provides a credible foundation for making modern earning capacity visible without presenting a prototype score as an automatic lending decision.
 
