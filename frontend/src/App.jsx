@@ -10,6 +10,9 @@ import { scoreApplicant, scoreUploadedCsv } from './services/api';
 import { CsvUploadForm } from './components/CsvUploadForm';
 import { DemoApplicantSelector } from './components/DemoApplicantSelector';
 import { extractFinancialData } from './services/financialData';
+import { saveSessionAssessment } from './services/sessionRegistry';
+import { ApplicantRegistry } from './components/ApplicantRegistry';
+import { filterSessionAssessments } from './services/sessionRegistry';
 import './App.css';
 
 export default function App() {
@@ -28,7 +31,20 @@ export default function App() {
 
   // Current evaluated applicant payload from Member 2 backend
   const [assessedApplicant, setAssessedApplicant] = useState(null);
+  const [sessionRecords, setSessionRecords] = useState([]);
   const [financialData, setFinancialData] = useState(null);
+
+  const filteredRecords = filterSessionAssessments(
+    sessionRecords,
+    searchQuery,
+    statusFilter,
+    riskFilter
+  );
+
+  const handleSelectApplicant = (record) => {
+    setAssessedApplicant(record.assessment);
+    setFinancialData(record.financialData);
+  };
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -49,6 +65,7 @@ export default function App() {
       // Call Member 2's backend service POST /score
       const response = await scoreApplicant(requestPayload);
 
+      setSessionRecords(prev => saveSessionAssessment(prev, response, null));
       setAssessedApplicant(response);
       setApiState({
         isLoading: false,
@@ -81,6 +98,7 @@ export default function App() {
       const financial = await extractFinancialData(file);
       const response = await scoreUploadedCsv(file);
       setFinancialData(financial);
+      setSessionRecords(prev => saveSessionAssessment(prev, response, financial));
       setAssessedApplicant(response);
       setApiState({
         isLoading: false,
@@ -129,7 +147,7 @@ export default function App() {
 
         <main className="dashboard-content">
           {/* Summary Metric Cards (Empty states / placeholders) */}
-          <EmptySummaryCards />
+          <EmptySummaryCards records={sessionRecords} />
 
           {/* Status Banner for Loading, Network Errors, and Validation Errors */}
           <StatusBanner state={apiState} onDismiss={handleDismissBanner} />
@@ -161,13 +179,37 @@ export default function App() {
             onReset={handleResetFilters}
           />
 
+          <ApplicantRegistry
+            records={filteredRecords}
+            selectedId={assessedApplicant?.applicant_id ?? null}
+            onSelect={handleSelectApplicant}
+          />
+
           {/* Detailed Assessment & Score Gauge Layout */}
           <ApplicantAssessmentLayout
             applicant={assessedApplicant}
             financialData={financialData}
             onReviewSubmit={(reviewData) => {
-              // Local review action; clearly indicated as unsaved in UI
-              console.info('Human review recorded locally:', reviewData);
+              const applicantId = assessedApplicant?.applicant_id;
+              if (!applicantId) return;
+
+              const statuses = {
+                approve: 'approved',
+                decline: 'declined',
+                more_data: 'more_data',
+              };
+
+              setSessionRecords(prev => prev.map(record =>
+                record.applicantId === applicantId
+                  ? {
+                      ...record,
+                      review: {
+                        ...reviewData,
+                        status: statuses[reviewData.decision],
+                      },
+                    }
+                  : record
+              ));
             }}
           />
         </main>

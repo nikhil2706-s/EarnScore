@@ -79,7 +79,10 @@ export function ApplicantAssessmentLayout({
         />
 
         {/* Human Review Decision Panel */}
-        <HumanReviewPanel onDecisionSubmit={onReviewSubmit} />
+        <HumanReviewPanel
+          key={applicant?.applicant_id ?? 'no-applicant'}
+          onDecisionSubmit={onReviewSubmit}
+        />
       </div>
     </div>
   );
