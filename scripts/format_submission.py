@@ -185,6 +185,47 @@ def style_document(source: Path, destination: Path) -> None:
             paragraph.paragraph_format.space_after = Pt(8)
             for run in paragraph.runs:
                 set_run_font(run, "Aptos Display", 14, BLUE, True)
+        elif text.startswith("Category:") or text.startswith("Secondary domain:"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(1)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.3, MID_GREY, run.bold)
+        elif text.startswith("Team name:") or text == "Team members:":
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_before = Pt(3 if text.startswith("Team name:") else 1)
+            paragraph.paragraph_format.space_after = Pt(1)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.5, NAVY, run.bold)
+        elif text in {"Nikhil Upadhyay", "Sharath B S", "Shaikh Asgar"}:
+            remove_numbering(paragraph)
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.left_indent = Inches(0)
+            paragraph.paragraph_format.first_line_indent = Inches(0)
+            paragraph.paragraph_format.space_after = Pt(0)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.3, NAVY, False)
+        elif text.startswith("GitHub repository:") or text.startswith("Repository:"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_before = Pt(3)
+            paragraph.paragraph_format.space_after = Pt(4)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 8.6, MID_GREY, run.bold)
+        elif text.startswith("Prototype scope:"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            paragraph.paragraph_format.left_indent = Inches(0.35)
+            paragraph.paragraph_format.right_indent = Inches(0.35)
+            paragraph.paragraph_format.space_before = Pt(4)
+            paragraph.paragraph_format.space_after = Pt(4)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.0, MID_GREY, run.bold)
+        elif "One-line pitch:" in text:
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.left_indent = Inches(0.40)
+            paragraph.paragraph_format.right_indent = Inches(0.40)
+            paragraph.paragraph_format.space_before = Pt(4)
+            paragraph.paragraph_format.space_after = Pt(5)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.4, NAVY, run.bold)
         elif "Nikhil Upadhyay" in text and "Sharath B S" in text:
             paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
             paragraph.paragraph_format.space_after = Pt(2)
@@ -292,7 +333,7 @@ def style_document(source: Path, destination: Path) -> None:
     prefix = fp.add_run("Winterfell Club  •  ")
     set_run_font(prefix, "Aptos", 7.5, MID_GREY, False)
     add_field(fp, "PAGE")
-    suffix = fp.add_run("  •  EarnScore Research Submission")
+    suffix = fp.add_run("  •  Hackathon Submission")
     set_run_font(suffix, "Aptos", 7.5, MID_GREY, False)
 
     # Keep field results and links current when Word/LibreOffice opens the file.
