@@ -86,3 +86,31 @@ export async function scoreApplicant(scoreRequest) {
   return responseData;
 }
 
+
+/**
+ * Upload a transaction CSV for automatic EarnScore assessment.
+ * The backend handles cleaning, feature extraction and scoring.
+ */
+export async function scoreUploadedCsv(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/score/upload-csv`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      typeof data.detail === 'string'
+        ? data.detail
+        : `CSV scoring failed (${response.status})`,
+      response.status,
+      data
+    );
+  }
+
+  return data;
+}

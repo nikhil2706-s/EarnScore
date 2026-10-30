@@ -6,7 +6,8 @@ import { EmptySummaryCards } from './components/EmptySummaryCards';
 import { AssessmentInputForm } from './components/AssessmentInputForm';
 import { StatusBanner } from './components/StatusBanner';
 import { ApplicantAssessmentLayout } from './components/ApplicantAssessmentLayout';
-import { scoreApplicant } from './services/api';
+import { scoreApplicant, scoreUploadedCsv } from './services/api';
+import { CsvUploadForm } from './components/CsvUploadForm';
 import './App.css';
 
 export default function App() {
@@ -62,6 +63,34 @@ export default function App() {
     }
   };
 
+  const handleCsvUpload = async (file) => {
+    setApiState({
+      isLoading: true,
+      error: null,
+      success: false,
+      disclaimer: null,
+    });
+
+    try {
+      const response = await scoreUploadedCsv(file);
+      setAssessedApplicant(response);
+      setApiState({
+        isLoading: false,
+        error: null,
+        success: true,
+        disclaimer: response.disclaimer,
+      });
+    } catch (error) {
+      setAssessedApplicant(null);
+      setApiState({
+        isLoading: false,
+        error,
+        success: false,
+        disclaimer: null,
+      });
+    }
+  };
+
   const handleDismissBanner = () => {
     setApiState((prev) => ({ ...prev, error: null, success: false }));
   };
@@ -97,6 +126,11 @@ export default function App() {
           <StatusBanner state={apiState} onDismiss={handleDismissBanner} />
 
           {/* Validated Feature Evaluation Form */}
+          <CsvUploadForm
+            onUpload={handleCsvUpload}
+            isLoading={apiState.isLoading}
+          />
+
           <AssessmentInputForm
             onSubmit={handleScoreSubmit}
             isLoading={apiState.isLoading}
