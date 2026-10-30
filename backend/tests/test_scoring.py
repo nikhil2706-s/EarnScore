@@ -37,3 +37,30 @@ def test_high_income_volatility():
     result = calculate_score(features)
 
     assert "High income volatility" in result["risk_flags"]
+
+
+def test_factor_points_match_score():
+    result = calculate_score(sample_features())
+
+    total_points = sum(
+        factor["points"] for factor in result["factors"]
+    )
+
+    assert result["score"] == 300 + total_points
+
+def test_missing_buffer_points_match_score():
+    features = sample_features()
+    features["emergency_buffer_days"] = None
+
+    result = calculate_score(features)
+
+    total_points = sum(
+        factor["points"] for factor in result["factors"]
+    )
+
+    assert result["score"] == 300 + total_points
+    assert result["confidence"] == 0.95
+    assert all(
+        factor["key"] != "emergency_buffer_days"
+        for factor in result["factors"]
+    )

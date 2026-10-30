@@ -1,23 +1,40 @@
 
-from typing import Optional
+from decimal import Decimal, ROUND_HALF_UP
+
+WEIGHTS = {
+    "active_months_ratio": 0.25,
+    "income_cv": 0.20,
+    "positive_cashflow_months_ratio": 0.20,
+    "expense_to_income_ratio": 0.15,
+    "income_trend": 0.10,
+    "emergency_buffer_days": 0.05,
+    "source_diversity": 0.05,
+}
+
+LABELS = {
+    "active_months_ratio": "Income consistency",
+    "income_cv": "Income stability",
+    "positive_cashflow_months_ratio": "Positive cash-flow months",
+    "expense_to_income_ratio": "Expense management",
+    "income_trend": "Income growth trend",
+    "emergency_buffer_days": "Emergency savings buffer",
+    "source_diversity": "Income source diversity",
+}
+
+
+def clamp(value):
+    return max(0.0, min(1.0, float(value)))
+
+
+def round_points(value):
+    return int(
+        Decimal(str(value)).quantize(
+            Decimal("1"), rounding=ROUND_HALF_UP
+        )
+    )
 
 
 def calculate_score(features: dict) -> dict:
-    """Calculate an explainable alternative credit score."""
-
-    weights = {
-        "active_months_ratio": 0.25,
-        "income_cv": 0.20,
-        "positive_cashflow_months_ratio": 0.20,
-        "expense_to_income_ratio": 0.15,
-        "income_trend": 0.10,
-        "emergency_buffer_days": 0.05,
-        "source_diversity": 0.05,
-    }
-
-    def clamp(value, low=0.0, high=1.0):
-        return max(low, min(high, value))
-
     normalized = {
         "active_months_ratio": clamp(features["active_months_ratio"]),
         "income_cv": clamp(1 - features["income_cv"]),
@@ -27,9 +44,7 @@ def calculate_score(features: dict) -> dict:
         "expense_to_income_ratio": clamp(
             1 - features["expense_to_income_ratio"]
         ),
-        "income_trend": clamp(
-            (features["income_trend"] + 0.5) / 1.0
-        ),
+        "income_trend": clamp(features["income_trend"] + 0.5),
         "emergency_buffer_days": (
             clamp(features["emergency_buffer_days"] / 90)
             if features.get("emergency_buffer_days") is not None
@@ -44,14 +59,38 @@ def calculate_score(features: dict) -> dict:
         if value is not None
     }
 
-    total_weight = sum(weights[key] for key in available)
+    total_weight = sum(WEIGHTS[key] for key in available)
 
-    weighted_score = sum(
-        weights[key] * value
+    if total_weight <= 0:
+        raise ValueError("No financial features available")
+
+    # Allocate the 600 variable points across available factors.
+    raw_points = {
+        key: 600 * WEIGHTS[key] * value / total_weight
         for key, value in available.items()
-    ) / total_weight
+    }
 
-    score = round(300 + 600 * weighted_score)
+    variable_points = round_points(sum(raw_points.values()))
+
+    # Largest-remainder allocation keeps factor points consistent.
+    points = {
+        key: int(value)
+        for key, value in raw_points.items()
+    }
+    remaining = variable_points - sum(points.values())
+
+    ranked = sorted(
+        raw_points,
+        key=lambda key: (
+            -(raw_points[key] - points[key]),
+            key,
+        ),
+    )
+
+    for key in ranked[:remaining]:
+        points[key] += 1
+
+    score = 300 + sum(points.values())
 
     if score >= 750:
         band = "Strong"
@@ -61,18 +100,17 @@ def calculate_score(features: dict) -> dict:
         band = "Needs Review"
 
     factors = []
-
     for key, value in available.items():
-        max_points = round(600 * weights[key])
-        points = round(600 * weights[key] * value / total_weight)
+        maximum = 600 * WEIGHTS[key] / total_weight
 
         factors.append({
             "key": key,
-            "label": key.replace("_", " ").title(),
-            "points": points,
-            "max_points": max_points,
+            "label": LABELS[key],
+            "points": points[key],
+            "max_points": round_points(maximum),
             "explanation": (
-                f"Normalized contribution: {value:.2f}"
+                f"{LABELS[key]} contributed {points[key]} "
+                f"points based on the available financial data."
             ),
             "evidence": {key: features[key]},
         })
@@ -91,9 +129,8 @@ def calculate_score(features: dict) -> dict:
     if features.get("emergency_buffer_days") is None:
         risk_flags.append("Emergency buffer data unavailable")
 
-    confidence = round(
-        sum(weights[key] for key in available), 2
-    )
+    # Confidence currently measures feature completeness only.
+    confidence = round(total_weight, 2)
 
     return {
         "score": score,
