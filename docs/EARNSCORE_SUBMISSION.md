@@ -5,6 +5,13 @@
 **Category:** FinTech  
 **Secondary domain:** Alternative Credit Scoring and Financial Inclusion
 
+**Team name:** Winterfell Club
+**Team members:**
+
+- Nikhil Upadhyay
+- Sharath B S
+- Shaikh Asgar
+
 > **One-line pitch:** EarnScore converts fragmented gig-worker income and cash-flow records into an explainable financial profile that helps lenders recognize consistent earning capacity beyond salary slips and conventional credit history.
 
 ---
@@ -58,28 +65,30 @@ EarnScore is an explainable decision-support platform that transforms raw gig-pl
 2. **Normalize:** EarnScore standardizes dates, amounts, transaction directions, and source names across platforms and accounts.
 3. **Clean and classify:** The system detects duplicate records, reversals, refunds, transfers between the applicant's own accounts, income, and expenses.
 4. **Build financial features:** It measures active earning months, month-to-month income variation, positive-cash-flow months, expense-to-income ratio, source concentration, recent income trend, and available financial buffer.
-5. **Calculate an EarnScore:** A deterministic model starts at 300 and awards up to 600 points across six explainable factors.
-6. **Measure confidence:** Observation length, coverage, source verification, and transaction-classification quality produce a separate confidence value.
+5. **Calculate an EarnScore:** A deterministic model starts at 300 and awards up to 600 points across seven explainable financial features.
+6. **Measure confidence:** Data coverage, transaction density, classification quality, active earning history, and feature availability produce separate evidence-quality indicators.
 7. **Explain the result:** The dashboard displays factor-level points, plain-language explanations, the evidence used, income trends, source mix, and risk flags.
 8. **Support human review:** A lender may approve, decline, or request more information and record notes. The review decision does not silently alter the calculated score.
 
 ### Explainable score design
 
-| Factor | Maximum points | Financial question answered |
-| --- | ---: | --- |
-| Income consistency | 180 | Does the applicant earn during most observed periods? |
-| Income stability | 130 | How much does income fluctuate between months? |
-| Cash-flow health | 110 | Does income generally cover observed expenses? |
-| Source resilience | 70 | Is income overly dependent on one source? |
-| Income trend | 50 | Is recent earning capacity stable or improving? |
-| Financial buffer | 60 | Is there a visible cushion against short interruptions? |
+| Factor | Weight | Maximum points when all features are available | Financial question answered |
+| --- | ---: | ---: | --- |
+| Income consistency | 25% | 150 | Does the applicant earn during most observed periods? |
+| Income stability | 20% | 120 | How much does income fluctuate between months? |
+| Positive cash-flow months | 20% | 120 | How often does observed income exceed expenses? |
+| Expense management | 15% | 90 | Is the expense-to-income ratio sustainable? |
+| Income trend | 10% | 60 | Is recent earning capacity stable or improving? |
+| Emergency savings buffer | 5% | 30 | Is there a visible cushion against short interruptions? |
+| Income-source diversity | 5% | 30 | Is income overly dependent on one source? |
+
+If a feature such as running-balance-based buffer days is genuinely unavailable, its weight is excluded and the 600 variable points are proportionally allocated across the available factors. Feature completeness remains visible to the reviewer instead of silently treating missing data as good or bad behavior.
 
 The result is clamped between 300 and 900. Suggested interpretation bands are:
 
 - **750–900 — Strong:** consistent and resilient observed earning pattern
-- **650–749 — Stable:** generally healthy pattern with limited concerns
-- **550–649 — Developing:** useful earning evidence with volatility or gaps
-- **300–549 — Limited evidence / higher volatility:** insufficient history or material instability requiring closer review
+- **600–749 — Moderate:** useful earning evidence with some volatility or concerns
+- **300–599 — Needs Review:** limited evidence or material instability requiring closer review
 
 These bands describe observed financial behavior. They do not claim a validated probability of default. Production use would require lender-specific outcome data, calibration, bias testing, regulatory review, and continuous monitoring.
 
@@ -101,7 +110,19 @@ Explainable scoring API + confidence engine
 Lender dashboard, evidence view, and human review
 ```
 
-The hackathon implementation uses React, TypeScript, Tailwind CSS, and Recharts for the dashboard; Python, FastAPI, Pydantic, and pandas for analysis; and SQLite or in-memory fixtures for demonstration storage.
+The hackathon implementation uses React, Vite, JavaScript, and responsive CSS for the dashboard, with Python, FastAPI, Pydantic, pandas, and NumPy for the data and scoring services. Reproducible CSV fixtures provide demonstration data without requiring access to real financial information.
+
+### Implemented MVP
+
+The three development branches already contain the following working components:
+
+- **Data pipeline:** Three reproducible personas—stable, volatile, and seasonal—plus schema validation, transaction classification, exact-duplicate removal, conflicting-record quarantine, refund and transfer handling, monthly aggregation, seven financial features, and a command-line CSV-to-JSON workflow.
+- **Data-quality engine:** Measures observed and missing months, transaction count, unclassified ratio, and evidence confidence. Its deterministic confidence formula considers coverage, transaction density, classification quality, and active earning history.
+- **Scoring API:** A FastAPI service with health and scoring endpoints, strict request validation, deterministic 300–900 scoring, factor-level points, readable explanations, evidence values, score bands, and risk flags for volatility, high expenses, irregular activity, and unavailable buffer data.
+- **Lender dashboard:** A responsive React interface connected to the scoring API, including an assessment form, score gauge, factor bars, data-quality indicators, risk flags, filtering controls, API status handling, and a human-review panel.
+- **Automated validation:** Unit and integration tests cover generation, schemas, cleaning, feature extraction, command-line execution, scoring boundaries, missing features, API validation, and all three personas.
+
+The human-review panel records the review locally in the current MVP. Persistent review storage and production identity controls are planned after the hackathon demonstration.
 
 ### Demonstration scenarios
 
