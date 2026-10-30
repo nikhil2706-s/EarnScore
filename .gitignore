@@ -21,3 +21,5 @@ uploads/
 .idea/
 .vscode/
 .DS_Store
+.vercel
+.env*
