@@ -1,6 +1,6 @@
 
 from typing import Optional
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
@@ -11,6 +11,17 @@ app = FastAPI(
     title="EarnScore API",
     description="Explainable Alternative Credit Scoring for Gig Workers",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept"],
+    allow_credentials=False,
 )
 
 
