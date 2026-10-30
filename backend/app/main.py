@@ -1,4 +1,8 @@
+from fastapi import UploadFile, File, HTTPException
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
+from src.data_pipeline.pipeline import run_pipeline
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
@@ -87,3 +91,56 @@ def score_applicant(request: ScoreRequest):
         ),
         **result,
     }
+
+@app.post("/score/upload-csv")
+async def score_uploaded_csv(file: UploadFile = File(...)):
+    """Process a gig-worker CSV through the pipeline and scoring engine."""
+
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="Please upload a CSV file."
+        )
+
+    # Limit uploaded CSV files to 5 MB.
+    max_bytes = 5 * 1024 * 1024
+    content = await file.read(max_bytes + 1)
+    await file.close()
+
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail="CSV file exceeds the 5 MB limit."
+        )
+
+    if not content.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="CSV file is empty."
+        )
+
+    with TemporaryDirectory() as temp_dir:
+        csv_path = Path(temp_dir) / "transactions.csv"
+        csv_path.write_bytes(content)
+
+        try:
+            payload = run_pipeline(csv_path)
+
+            result = calculate_score(
+                payload.features.model_dump()
+            )
+
+            return {
+                "applicant_id": payload.applicant_id,
+                "analysis_period_months": payload.analysis_period_months,
+                "features": payload.features.model_dump(),
+                "data_quality": payload.data_quality.model_dump()
+                if payload.data_quality is not None else None,
+                **result,
+            }
+
+        except (ValueError, UnicodeError) as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Invalid transaction data: {exc}"
+            ) from exc
