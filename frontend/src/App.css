@@ -1020,3 +1020,260 @@
     gap: 1rem;
   }
 }
+
+
+/* EarnScore premium light layout ? foundation */
+.sidebar {
+  width: 224px;
+  background: #ffffff;
+  border-right: 1px solid #e5ebe7;
+}
+
+.brand-icon {
+  background: #15803d;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.sidebar-header {
+  padding: 1.25rem 1rem;
+  min-height: 76px;
+}
+
+.sidebar-nav {
+  padding: 1.25rem 0.75rem;
+}
+
+.nav-item {
+  border-radius: 9px;
+}
+
+.nav-item.active {
+  background: #eaf6ee;
+  color: #166534;
+  border-left: 3px solid #15803d;
+}
+
+.nav-item.active .nav-icon {
+  color: #15803d;
+}
+
+.sidebar-footer {
+  background: #ffffff;
+  border-top: 1px solid #e5ebe7;
+}
+
+.guardrail-pill {
+  background: #f0f9f3;
+  border: 1px solid #d4e9db;
+  color: #526357;
+}
+
+.guardrail-pill strong {
+  color: #166534;
+}
+
+.dashboard-header {
+  background: #ffffff;
+  backdrop-filter: none;
+  border-bottom: 1px solid #e5ebe7;
+  min-height: 72px;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+}
+
+.main-wrapper {
+  min-width: 0;
+  background: #f7f9f8;
+}
+
+.dashboard-content {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-width: 0;
+}
+
+.header-title-group h1 {
+  color: #17251c;
+}
+
+.header-subtitle {
+  color: #697a6f;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .sidebar {
+    width: 200px;
+  }
+}
+
+
+/* EarnScore premium interface ? readability and spacing */
+
+/* Strong, readable primary actions */
+.btn-primary {
+  background: #15803d;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 9px;
+  box-shadow: none;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #166534;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  background: #a8d5b7;
+  color: #365b42;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* Secondary buttons */
+.btn-secondary {
+  background: #ffffff;
+  color: #166534;
+  border: 1px solid #d3dfd7;
+  border-radius: 9px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f0f9f3;
+}
+
+/* Dashboard content alignment */
+.dashboard-content {
+  max-width: 1480px;
+  width: 100%;
+  padding: 1.5rem 2rem;
+}
+
+/* Cards */
+.panel-card,
+.assessment-card,
+.summary-card {
+  border: 1px solid #e5ebe7;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(20, 48, 29, 0.035);
+}
+
+/* Improve readable text */
+.section-title {
+  color: #17251c;
+  font-weight: 650;
+}
+
+.card-label,
+.card-footnote,
+.empty-state-text {
+  line-height: 1.5;
+}
+
+/* Success and informational feedback */
+.status-banner.success {
+  background: #eaf8ef;
+  border-color: #a7dfb8;
+  color: #166534;
+}
+
+.status-banner.success * {
+  color: #166534;
+}
+
+/* Visible keyboard focus */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #86cfa0;
+  outline-offset: 2px;
+}
+
+/* Responsive width */
+@media (max-width: 1100px) {
+  .dashboard-content {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+}
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary {
+    transition: none;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+
+/* Premium demo applicant cards */
+.panel-card .form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.panel-card .form-grid > .form-group {
+  min-width: 0;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e0ebe3;
+  border-radius: 12px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.panel-card .form-grid > .form-group:hover {
+  border-color: #8fc5a0;
+  box-shadow: 0 8px 24px rgba(21, 128, 61, 0.08);
+  transform: translateY(-2px);
+}
+
+.panel-card .form-grid > .form-group strong {
+  color: #17251c;
+  font-size: 1rem;
+}
+
+.panel-card .form-grid > .form-group p {
+  color: #526357;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.panel-card .form-grid > .form-group .btn-primary {
+  width: 100%;
+  min-height: 42px;
+}
+
+@media (max-width: 900px) {
+  .panel-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-card .form-grid > .form-group {
+    transition: none;
+  }
+
+  .panel-card .form-grid > .form-group:hover {
+    transform: none;
+  }
+}
