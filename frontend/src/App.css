@@ -962,3 +962,30 @@
   align-items: center;
   gap: 0.6rem;
 }
+
+
+/* Financial evidence chart layout */
+.assessment-layout {
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+}
+
+.assessment-details-column {
+  min-width: 0;
+}
+
+.assessment-details-column > .panel-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.assessment-details-column .recharts-responsive-container {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 1080px) {
+  .assessment-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

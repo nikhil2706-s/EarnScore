@@ -3,7 +3,7 @@ import { ScoreFactorBars } from './ScoreFactorBars';
 import { RiskFlags } from './RiskFlags';
 import { DataQualityIndicators } from './DataQualityIndicators';
 import { HumanReviewPanel } from './HumanReviewPanel';
-import { IconEmptyBox } from './Icons';
+import { FinancialCharts } from './FinancialCharts';
 
 /**
  * ApplicantAssessmentLayout structures the detailed assessment view.
@@ -17,6 +17,7 @@ import { IconEmptyBox } from './Icons';
  */
 export function ApplicantAssessmentLayout({
   applicant = null,
+  financialData = null,
   onReviewSubmit = () => {}
 }) {
   const isAssessmentLoaded = Boolean(applicant && typeof applicant.score === 'number');
@@ -62,17 +63,7 @@ export function ApplicantAssessmentLayout({
             </span>
           </div>
 
-          <div className="empty-state-box">
-            <div className="empty-state-icon" aria-hidden="true">
-              <IconEmptyBox />
-            </div>
-            <span className="empty-state-heading">
-              {isAssessmentLoaded ? "Transaction Stream Loaded" : "No Transaction History Loaded"}
-            </span>
-            <p className="empty-state-text">
-              Normalized gig earnings timeline, monthly net cash-flow comparisons, and platform source breakdown will appear here once an applicant or CSV file is selected.
-            </p>
-          </div>
+          <FinancialCharts financialData={financialData} />
         </div>
 
         {/* Risk Flags */}

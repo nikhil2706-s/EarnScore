@@ -9,6 +9,7 @@ import { ApplicantAssessmentLayout } from './components/ApplicantAssessmentLayou
 import { scoreApplicant, scoreUploadedCsv } from './services/api';
 import { CsvUploadForm } from './components/CsvUploadForm';
 import { DemoApplicantSelector } from './components/DemoApplicantSelector';
+import { extractFinancialData } from './services/financialData';
 import './App.css';
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
 
   // Current evaluated applicant payload from Member 2 backend
   const [assessedApplicant, setAssessedApplicant] = useState(null);
+  const [financialData, setFinancialData] = useState(null);
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -35,6 +37,7 @@ export default function App() {
   };
 
   const handleScoreSubmit = async (requestPayload) => {
+    setFinancialData(null);
     setApiState({
       isLoading: true,
       error: null,
@@ -65,6 +68,8 @@ export default function App() {
   };
 
   const handleCsvUpload = async (file) => {
+    setFinancialData(null);
+    setAssessedApplicant(null);
     setApiState({
       isLoading: true,
       error: null,
@@ -73,7 +78,9 @@ export default function App() {
     });
 
     try {
+      const financial = await extractFinancialData(file);
       const response = await scoreUploadedCsv(file);
+      setFinancialData(financial);
       setAssessedApplicant(response);
       setApiState({
         isLoading: false,
@@ -83,6 +90,7 @@ export default function App() {
       });
     } catch (error) {
       setAssessedApplicant(null);
+      setFinancialData(null);
       setApiState({
         isLoading: false,
         error,
@@ -156,6 +164,7 @@ export default function App() {
           {/* Detailed Assessment & Score Gauge Layout */}
           <ApplicantAssessmentLayout
             applicant={assessedApplicant}
+            financialData={financialData}
             onReviewSubmit={(reviewData) => {
               // Local review action; clearly indicated as unsaved in UI
               console.info('Human review recorded locally:', reviewData);
