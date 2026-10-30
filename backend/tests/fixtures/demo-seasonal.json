@@ -1,0 +1,20 @@
+{
+  "applicant_id": "demo-seasonal-003",
+  "analysis_period_months": 12,
+  "features": {
+    "active_months_ratio": 0.5833,
+    "income_cv": 1.1623,
+    "source_diversity": 0.9021,
+    "positive_cashflow_months_ratio": 0.4167,
+    "expense_to_income_ratio": 0.6229,
+    "income_trend": -0.9435,
+    "emergency_buffer_days": null
+  },
+  "data_quality": {
+    "coverage_months": 12,
+    "missing_months": 0,
+    "total_transactions": 162,
+    "unclassified_ratio": 0.0,
+    "confidence": 0.96
+  }
+}

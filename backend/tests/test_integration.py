@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from backend.app.main import app
 
 client = TestClient(app)
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parent / "fixtures"
 
 PERSONAS = [
     ("demo-stable-001", "demo-features.json"),
