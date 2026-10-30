@@ -3,7 +3,8 @@
 export function Header({
   title = "Underwriting & Applicant Overview",
   onBack,
-  showBack = false
+  showBack = false,
+  onLogout
 }) {
   return (
     <header className="dashboard-header">
@@ -39,6 +40,15 @@ export function Header({
           </div>
           <span className="user-role">Lender Reviewer</span>
         </div>
+
+        <button
+          type="button"
+          className="header-logout-btn"
+          onClick={onLogout}
+          aria-label="Log out"
+        >
+          Log out
+        </button>
       </div>
     </header>
   );

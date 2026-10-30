@@ -13,9 +13,42 @@ import { extractFinancialData } from './services/financialData';
 import { saveSessionAssessment } from './services/sessionRegistry';
 import { ApplicantRegistry } from './components/ApplicantRegistry';
 import { filterSessionAssessments } from './services/sessionRegistry';
+import { AuthScreen } from './components/AuthScreen';
+import {
+  login,
+  signup,
+  logout,
+  getCurrentUser
+} from './auth/authService';
 import './App.css';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
+
+  const handleLogin = async (credentials) => {
+    const user = await login(credentials);
+    setCurrentUser(user);
+  };
+
+  const handleSignup = async (details) => {
+    await signup(details);
+    const user = await login({
+      email: details.email,
+      password: details.password,
+    });
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    setSessionRecords([]);
+    setAssessedApplicant(null);
+    setFinancialData(null);
+    setActiveTab('overview');
+    setPageHistory([]);
+  };
+
   const [activeTab, setActiveTab] = useState('overview');
 
   const [pageHistory, setPageHistory] = useState([]);
@@ -156,6 +189,15 @@ export default function App() {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <AuthScreen
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+      />
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Navigation Sidebar */}
@@ -166,7 +208,7 @@ export default function App() {
         <Header
           title={getHeaderTitle()}
           onBack={handleGoBack}
-          showBack={pageHistory.length > 0}
+          showBack={pageHistory.length > 0} onLogout={handleLogout}
         />
 
         <main className="dashboard-content">

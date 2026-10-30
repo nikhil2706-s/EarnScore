@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 
 export function AuthScreen({ onLogin, onSignup }) {
   const [mode, setMode] = useState('login');
@@ -10,7 +10,7 @@ export function AuthScreen({ onLogin, onSignup }) {
 
   const isSignup = mode === 'signup';
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
@@ -29,10 +29,14 @@ export function AuthScreen({ onLogin, onSignup }) {
       return;
     }
 
-    if (isSignup) {
-      onSignup({ name: name.trim(), email: email.trim(), password });
-    } else {
-      onLogin({ email: email.trim(), password });
+    try {
+      if (isSignup) {
+        await onSignup({ name: name.trim(), email: email.trim(), password });
+      } else {
+        await onLogin({ email: email.trim(), password });
+      }
+    } catch (err) {
+      setError(err.message || 'Authentication failed. Please try again.');
     }
   };
 
