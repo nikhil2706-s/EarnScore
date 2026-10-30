@@ -106,29 +106,29 @@ def style_document(source: Path, destination: Path) -> None:
     section.page_width = Cm(21.0)
     section.page_height = Cm(29.7)
     section.orientation = WD_ORIENT.PORTRAIT
-    section.top_margin = Inches(0.82)
-    section.bottom_margin = Inches(0.78)
-    section.left_margin = Inches(0.88)
-    section.right_margin = Inches(0.88)
-    section.header_distance = Inches(0.35)
-    section.footer_distance = Inches(0.35)
+    section.top_margin = Inches(0.72)
+    section.bottom_margin = Inches(0.70)
+    section.left_margin = Inches(0.78)
+    section.right_margin = Inches(0.78)
+    section.header_distance = Inches(0.28)
+    section.footer_distance = Inches(0.30)
 
     normal = doc.styles["Normal"]
     normal.font.name = "Aptos"
     normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Aptos")
-    normal.font.size = Pt(10.5)
+    normal.font.size = Pt(10.0)
     normal.font.color.rgb = RGBColor.from_string("202939")
-    normal.paragraph_format.space_after = Pt(6)
-    normal.paragraph_format.line_spacing = 1.16
+    normal.paragraph_format.space_after = Pt(4)
+    normal.paragraph_format.line_spacing = 1.10
     normal.paragraph_format.widow_control = True
 
     heading_specs = {
-        "Title": (28, NAVY, 18, 12),
-        "Subtitle": (16, BLUE, 5, 10),
-        "Heading 1": (16, NAVY, 14, 7),
-        "Heading 2": (13, BLUE, 11, 5),
-        "Heading 3": (11.5, NAVY, 9, 4),
-        "Heading 4": (10.5, BLUE, 7, 3),
+        "Title": (22, NAVY, 6, 5),
+        "Subtitle": (14, BLUE, 2, 7),
+        "Heading 1": (13.5, NAVY, 11, 5),
+        "Heading 2": (11.5, BLUE, 8, 3),
+        "Heading 3": (10.5, NAVY, 6, 2),
+        "Heading 4": (10.0, BLUE, 5, 2),
     }
     for style_name, (size, color, before, after) in heading_specs.items():
         if style_name not in doc.styles:
@@ -147,7 +147,7 @@ def style_document(source: Path, destination: Path) -> None:
     if "Block Text" in doc.styles:
         block = doc.styles["Block Text"]
         block.font.name = "Aptos"
-        block.font.size = Pt(10.5)
+        block.font.size = Pt(9.5)
         block.font.color.rgb = RGBColor.from_string(NAVY)
         block.paragraph_format.left_indent = Inches(0.25)
         block.paragraph_format.right_indent = Inches(0.25)
@@ -165,45 +165,69 @@ def style_document(source: Path, destination: Path) -> None:
         code.paragraph_format.space_after = Pt(4)
         code.paragraph_format.keep_together = True
 
-    # Cover-page treatment: all content before the first numbered section.
+    # Compact research-paper title, author, abstract, and keyword block.
     first_section_index = None
-    team_names = {"Nikhil Upadhyay", "Sharath B S", "Shaikh Asgar"}
+    abstract_index = None
     for index, paragraph in enumerate(doc.paragraphs):
         text = paragraph.text.strip()
         if text == "1. Problem Statement":
             first_section_index = index
-            paragraph.paragraph_format.page_break_before = True
             break
 
-        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        paragraph.paragraph_format.left_indent = Inches(0.35)
-        paragraph.paragraph_format.right_indent = Inches(0.35)
-        paragraph.paragraph_format.space_after = Pt(8)
-
         if text == "EarnScore":
-            paragraph.paragraph_format.space_before = Pt(62)
-            paragraph.paragraph_format.space_after = Pt(12)
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_before = Pt(5)
+            paragraph.paragraph_format.space_after = Pt(4)
             for run in paragraph.runs:
-                set_run_font(run, "Aptos Display", 30, NAVY, True)
+                set_run_font(run, "Aptos Display", 22, NAVY, True)
         elif text == "Alternative Creditworthiness Score for Gig Workers":
-            paragraph.paragraph_format.space_after = Pt(28)
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(8)
             for run in paragraph.runs:
-                set_run_font(run, "Aptos Display", 17, BLUE, True)
-        elif text in team_names:
-            remove_numbering(paragraph)
-            paragraph.style = doc.styles["Normal"]
+                set_run_font(run, "Aptos Display", 14, BLUE, True)
+        elif "Nikhil Upadhyay" in text and "Sharath B S" in text:
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(2)
             for run in paragraph.runs:
-                set_run_font(run, "Aptos", 11, NAVY, False)
-        elif text.startswith("Team name:"):
-            paragraph.paragraph_format.space_before = Pt(18)
-        elif text.startswith("Prototype scope:"):
-            paragraph.paragraph_format.space_before = Pt(18)
+                set_run_font(run, "Aptos", 10.5, NAVY, True)
+        elif text == "Winterfell Club":
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(1)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 10, NAVY, True)
+        elif text.startswith("FinTech"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(2)
             for run in paragraph.runs:
                 set_run_font(run, "Aptos", 9.5, MID_GREY, run.bold)
-        elif "One-line pitch:" in text:
-            paragraph.paragraph_format.space_before = Pt(12)
+                run.italic = True
+        elif text.startswith("Repository:"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_after = Pt(8)
             for run in paragraph.runs:
-                set_run_font(run, "Aptos", 10.5, NAVY, run.bold)
+                set_run_font(run, "Aptos", 8.8, MID_GREY, run.bold)
+        elif text == "Abstract":
+            abstract_index = index
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.paragraph_format.space_before = Pt(5)
+            paragraph.paragraph_format.space_after = Pt(3)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 10.5, NAVY, True)
+        elif abstract_index is not None and text.startswith("Keywords—"):
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            paragraph.paragraph_format.left_indent = Inches(0.3)
+            paragraph.paragraph_format.right_indent = Inches(0.3)
+            paragraph.paragraph_format.space_after = Pt(7)
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.2, NAVY, run.bold)
+        elif abstract_index is not None:
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            paragraph.paragraph_format.left_indent = Inches(0.3)
+            paragraph.paragraph_format.right_indent = Inches(0.3)
+            paragraph.paragraph_format.space_after = Pt(3)
+            paragraph.paragraph_format.line_spacing = 1.05
+            for run in paragraph.runs:
+                set_run_font(run, "Aptos", 9.2, "202939", run.bold)
 
     # Body paragraph consistency and heading safeguards.
     start = first_section_index or 0
@@ -214,6 +238,10 @@ def style_document(source: Path, destination: Path) -> None:
             paragraph.paragraph_format.keep_together = True
         elif style_name not in {"Source Code", "Caption"}:
             paragraph.paragraph_format.widow_control = True
+            p_pr = paragraph._p.pPr
+            is_list = p_pr is not None and p_pr.find(qn("w:numPr")) is not None
+            if not is_list:
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
         if "CSV / simulated gig records" in paragraph.text:
             paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -244,28 +272,28 @@ def style_document(source: Path, destination: Path) -> None:
                     paragraph.paragraph_format.space_after = Pt(2)
                     paragraph.paragraph_format.line_spacing = 1.05
                     for run in paragraph.runs:
-                        set_run_font(run, "Aptos", 9.2, WHITE if row_index == 0 else "202939", row_index == 0 or run.bold)
+                        set_run_font(run, "Aptos", 8.8, WHITE if row_index == 0 else "202939", row_index == 0 or run.bold)
 
     # Header and footer.
     header = section.header
     header.is_linked_to_previous = False
     hp = header.paragraphs[0]
-    hp.text = "EARNSCORE  |  WINTERFELL CLUB"
+    hp.text = "EarnScore — Alternative Creditworthiness Score for Gig Workers"
     hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     hp.paragraph_format.space_after = Pt(0)
     for run in hp.runs:
-        set_run_font(run, "Aptos", 8, MID_GREY, True)
+        set_run_font(run, "Aptos", 7.5, MID_GREY, False)
 
     footer = section.footer
     footer.is_linked_to_previous = False
     fp = footer.paragraphs[0]
     fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     fp.paragraph_format.space_after = Pt(0)
-    prefix = fp.add_run("EarnScore  •  ")
-    set_run_font(prefix, "Aptos", 8, MID_GREY, False)
+    prefix = fp.add_run("Winterfell Club  •  ")
+    set_run_font(prefix, "Aptos", 7.5, MID_GREY, False)
     add_field(fp, "PAGE")
-    suffix = fp.add_run("  •  Hackathon Submission")
-    set_run_font(suffix, "Aptos", 8, MID_GREY, False)
+    suffix = fp.add_run("  •  EarnScore Research Submission")
+    set_run_font(suffix, "Aptos", 7.5, MID_GREY, False)
 
     # Keep field results and links current when Word/LibreOffice opens the file.
     settings = doc.settings._element

@@ -2,23 +2,19 @@
 
 ## Alternative Creditworthiness Score for Gig Workers
 
-**Category:** FinTech
+**Nikhil Upadhyay · Sharath B S · Shaikh Asgar**
 
-**Secondary domain:** Alternative Credit Scoring and Financial Inclusion
+**Winterfell Club**
 
-**Team name:** Winterfell Club
+*FinTech · Alternative Credit Scoring and Financial Inclusion*
 
-**Team members:**
+**Repository:** <https://github.com/nikhil2706-s/EarnScore>
 
-- Nikhil Upadhyay
-- Sharath B S
-- Shaikh Asgar
+## Abstract
 
-**GitHub repository:** <https://github.com/nikhil2706-s/EarnScore>
+Gig workers often generate consistent income without the salary documentation or established credit history expected by conventional underwriting. EarnScore addresses this mismatch through an explainable decision-support prototype that converts fragmented simulated transaction records into a consolidated profile of earning consistency, stability, cash-flow health, source diversity, income trend, and financial buffer. The implemented system combines a tested CSV normalization pipeline, seven financial features, separate evidence-quality indicators, a deterministic 300–900 scoring API, and a lender-facing React dashboard. Three integrated personas produced materially different assessments: a stable worker scored 836 (Strong), while volatile and seasonal workers scored 485 and 509 (Needs Review). The design deliberately separates data-quality confidence from financial assessment, ensuring that extensive evidence can still reveal an unstable earning pattern. EarnScore is not a trained machine-learning credit-risk model, an officially validated credit score, or an automated loan-approval system. It demonstrates how transparent cash-flow evidence and human review can support fairer assessment of non-salaried workers while preserving uncertainty, explainability, and responsible-use constraints.
 
-**Prototype scope:** EarnScore is an explainable decision-support prototype. It is not an officially validated credit score, a trained machine-learning credit-risk model, or an automated loan-approval system.
-
-> **One-line pitch:** EarnScore converts fragmented gig-worker income and cash-flow records into an explainable financial profile that helps lenders recognize consistent earning capacity beyond salary slips and conventional credit history.
+**Keywords—** alternative credit scoring; gig workers; financial inclusion; cash-flow underwriting; explainable FinTech; income stability; decision support.
 
 ---
 
@@ -292,18 +288,7 @@ A production version could use a tiered B2B model:
 4. Run fairness, stability, privacy, and regulatory assessments.
 5. Launch as a decision-support API and dashboard for a narrowly defined credit product.
 
-### Research references
-
-1. NITI Aayog, *India's Booming Gig and Platform Economy: Perspectives and Recommendations on the Future of Work* (June 2022): gig-workforce estimates and projections.
-   <https://www.niti.gov.in/sites/default/files/2022-06/Policy_Brief_India%27s_Booming_Gig_and_Platform_Economy_27062022.pdf>
-2. Reserve Bank of India, *Non-Banking Financial Company – Account Aggregator (Reserve Bank) Directions, 2016*: the regulatory framework for consent-based financial-data aggregation.
-   <https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=10598>
-3. World Bank, *The Global Findex Database 2021: Financial Inclusion, Digital Payments, and Resilience in the Age of COVID-19*: financial-account ownership and digital-payment context.
-   <https://www.worldbank.org/en/publication/globalfindex>
-4. International Labour Organization, *World Employment and Social Outlook 2021: The Role of Digital Labour Platforms in Transforming the World of Work* (2021).
-   <https://www.ilo.org/publications/flagship-reports/role-digital-labour-platforms-transforming-world-work>
-
-The market figures above should be rechecked against the linked primary publications before external submission or publication. The hackathon MVP does not claim proprietary market validation or a production-ready risk model.
+The market evidence above is drawn from the primary publications listed in the References. The hackathon MVP does not claim proprietary market validation, customer validation, financial forecasts, regulatory certification, or a production-ready risk model.
 
 ## 7. Impact
 
@@ -364,4 +349,11 @@ The demonstration is successful when it proves that:
 EarnScore demonstrates that fragmented gig income can be converted into a consistent, explainable, and reviewable financial profile without relying on opaque personal signals. The implemented prototype joins a tested transaction pipeline, seven transparent financial features, a deterministic scoring API, and a lender-facing dashboard. Its results show the intended behavior: strong transaction coverage increases confidence in the evidence, while income volatility and irregular activity can still produce a cautious assessment.
 
 The immediate value is a clearer decision-support layer for non-salaried applicants. Production deployment would require consent-based integrations, persistent security and audit controls, lender-specific outcome calibration, regulatory review, fairness monitoring, and continued human oversight. Within its hackathon scope, EarnScore provides a credible foundation for making modern earning capacity visible without presenting a prototype score as an automatic lending decision.
+
+## References
+
+1. NITI Aayog, *India's Booming Gig and Platform Economy: Perspectives and Recommendations on the Future of Work*, June 2022. <https://www.niti.gov.in/sites/default/files/2022-06/Policy_Brief_India%27s_Booming_Gig_and_Platform_Economy_27062022.pdf>
+2. Reserve Bank of India, *Non-Banking Financial Company – Account Aggregator (Reserve Bank) Directions, 2016*. <https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=10598>
+3. World Bank, *The Global Findex Database 2021: Financial Inclusion, Digital Payments, and Resilience in the Age of COVID-19*, 2022. <https://www.worldbank.org/en/publication/globalfindex>
+4. International Labour Organization, *World Employment and Social Outlook 2021: The Role of Digital Labour Platforms in Transforming the World of Work*, 2021. <https://www.ilo.org/publications/flagship-reports/role-digital-labour-platforms-transforming-world-work>
 
