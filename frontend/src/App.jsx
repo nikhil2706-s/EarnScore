@@ -8,6 +8,7 @@ import { StatusBanner } from './components/StatusBanner';
 import { ApplicantAssessmentLayout } from './components/ApplicantAssessmentLayout';
 import { scoreApplicant, scoreUploadedCsv } from './services/api';
 import { CsvUploadForm } from './components/CsvUploadForm';
+import { DemoApplicantSelector } from './components/DemoApplicantSelector';
 import './App.css';
 
 export default function App() {
@@ -126,6 +127,11 @@ export default function App() {
           <StatusBanner state={apiState} onDismiss={handleDismissBanner} />
 
           {/* Validated Feature Evaluation Form */}
+          <DemoApplicantSelector
+            onUpload={handleCsvUpload}
+            isLoading={apiState.isLoading}
+          />
+
           <CsvUploadForm
             onUpload={handleCsvUpload}
             isLoading={apiState.isLoading}
