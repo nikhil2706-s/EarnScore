@@ -17,6 +17,26 @@ import './App.css';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
+
+  const [pageHistory, setPageHistory] = useState([]);
+
+  const handleNavigation = (tab) => {
+    if (tab === activeTab) return;
+
+    setPageHistory(prev => [...prev, activeTab]);
+    setActiveTab(tab);
+    window.scrollTo(0, 0);
+  };
+
+  const handleGoBack = () => {
+    if (pageHistory.length === 0) return;
+
+    const previousPage = pageHistory[pageHistory.length - 1];
+    setPageHistory(prev => prev.slice(0, -1));
+    setActiveTab(previousPage);
+    window.scrollTo(0, 0);
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
@@ -139,15 +159,21 @@ export default function App() {
   return (
     <div className="app-container">
       {/* Navigation Sidebar */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} onTabChange={handleNavigation} />
 
       {/* Main Content Area */}
       <div className="main-wrapper">
-        <Header title={getHeaderTitle()} />
+        <Header
+          title={getHeaderTitle()}
+          onBack={handleGoBack}
+          showBack={pageHistory.length > 0}
+        />
 
         <main className="dashboard-content">
           {/* Summary Metric Cards (Empty states / placeholders) */}
-          <EmptySummaryCards records={sessionRecords} />
+          {activeTab === 'overview' && (
+            <>
+              <EmptySummaryCards records={sessionRecords} />
 
           {/* Status Banner for Loading, Network Errors, and Validation Errors */}
           <StatusBanner state={apiState} onDismiss={handleDismissBanner} />
@@ -168,6 +194,13 @@ export default function App() {
             isLoading={apiState.isLoading}
           />
 
+            </>
+          )}
+
+          {activeTab === 'applicants' && (
+            <>
+          
+
           {/* Search and Filtering Controls */}
           <SearchFilterBar
             searchQuery={searchQuery}
@@ -184,6 +217,13 @@ export default function App() {
             selectedId={assessedApplicant?.applicant_id ?? null}
             onSelect={handleSelectApplicant}
           />
+
+            </>
+          )}
+
+          {activeTab === 'analysis' && (
+            <>
+          
 
           {/* Detailed Assessment & Score Gauge Layout */}
           <ApplicantAssessmentLayout
@@ -212,6 +252,27 @@ export default function App() {
               ));
             }}
           />
+
+            </>
+          )}
+
+          {activeTab === 'settings' && (
+            <section className="panel-card">
+              <h2 className="section-title">About EarnScore</h2>
+              <p>
+                EarnScore provides explainable, rule-based financial
+                assessments using available earnings and transaction evidence.
+              </p>
+              <p>
+                Scores are decision-support indicators, not credit bureau
+                scores or predictions of loan repayment probability.
+              </p>
+              <p>
+                Demo datasets are simulated. Applicant reviews and session
+                records are not permanently stored.
+              </p>
+            </section>
+          )}
         </main>
       </div>
     </div>

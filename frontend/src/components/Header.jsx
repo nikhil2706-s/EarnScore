@@ -1,10 +1,27 @@
 
 
-export function Header({ title = "Underwriting & Applicant Overview" }) {
+export function Header({
+  title = "Underwriting & Applicant Overview",
+  onBack,
+  showBack = false
+}) {
   return (
     <header className="dashboard-header">
       <div className="header-title-group">
-        <h1>{title}</h1>
+        <div className="header-title-row">
+          {showBack && (
+            <button
+              type="button"
+              className="header-back-btn"
+              onClick={onBack}
+              aria-label="Go to previous page"
+              title="Go back"
+            >
+              &larr;
+            </button>
+          )}
+          <h1>{title}</h1>
+        </div>
         <span className="header-subtitle">
           Decision-support evaluation for non-traditional gig earners
         </span>
