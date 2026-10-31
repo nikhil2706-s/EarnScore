@@ -30,7 +30,7 @@ app.add_middleware(
 
 
 @app.get("/")
-def home():
+async def home():
     return {
         "project": "EarnScore",
         "message": "Alternative Credit Scoring API",
@@ -39,7 +39,7 @@ def home():
 
 
 @app.get("/health")
-def health():
+async def health():
     return {
         "status": "healthy",
         "service": "EarnScore Scoring API"
@@ -75,7 +75,7 @@ class ScoreRequest(BaseModel):
 
 
 @app.post("/score")
-def score_applicant(request: ScoreRequest):
+async def score_applicant(request: ScoreRequest):
     result = calculate_score(
         request.features.model_dump()
     )
